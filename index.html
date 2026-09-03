@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKB/USDT — 4H Breakout Scanner Pro v4.6 PC (RVOL Hero + OBI Real)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#02040a;--s1:#0a0f1d;--s2:#111827;--s3:#1a2238;--border:#1e2b54;--border2:#2d3f7a;--text:#d1def2;--muted:#62779e;--dim:#3b4e75;--buy:#00ffcc;--sell:#ff3b69;--gold:#ffca28;--blue:#3b99ff;--purple:#af7ac5;--pump:#c026d3}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden}
+body{background:radial-gradient(ellipse at 50% -10%,#0a1128 0%,var(--bg) 55%);color:var(--text);font-family:'Space Grotesk',sans-serif;padding:22px;line-height:1.3;min-height:100vh}
+.mono{font-family:'JetBrains Mono',monospace}
+.wrap{max-width:1720px;margin:0 auto}
+
+/* ---------- TOP BAR ---------- */
+.topbar{background:linear-gradient(180deg,var(--s1) 0%,var(--s2) 100%);border:1px solid var(--border);border-radius:20px;padding:18px 26px;display:flex;align-items:center;gap:28px;box-shadow:0 30px 90px rgba(0,0,0,.6)}
+.version-tag{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1.3px;background:linear-gradient(90deg,var(--pump),var(--blue));color:#fff;padding:6px 14px;border-radius:9999px;box-shadow:0 0 15px rgba(192,38,211,.4);white-space:nowrap}
+.pair-block{display:flex;align-items:baseline;gap:14px;flex-shrink:0}
+.pair{font-size:1.3rem;font-weight:700;color:#fff}
+#priceDisplay{font-size:2.1rem;font-weight:800;color:#fff;letter-spacing:-.5px;transition:text-shadow .3s}
+#priceChange{font-size:1rem;font-weight:700}
+.topbar-spacer{flex:1}
+#squeezeBadge{font-size:.7rem;font-weight:700;padding:7px 14px;border-radius:9999px;background:#1c2333;color:var(--muted);border:1px solid var(--border);transition:all .4s cubic-bezier(.4,0,.2,1);white-space:nowrap}
+#squeezeBadge.squeezed{background:rgba(255,202,40,.15);color:var(--gold);border-color:var(--gold);animation:pulseGold 1.2s infinite alternate}
+@keyframes pulseGold{0%{box-shadow:0 0 8px rgba(255,202,40,.6)}100%{box-shadow:0 0 20px rgba(255,202,40,.9)}}
+.vol-container-top{display:flex;gap:10px}
+.live-vol-block-v2{background:var(--s3);border:1px solid var(--border2);padding:8px 14px;border-radius:14px;min-width:100px;transition:border-color .3s ease}
+.live-vol-top{display:flex;align-items:center;gap:5px;font-size:.6rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.live-vol-value-v2{font-size:1.05rem;font-weight:700;color:#fff;margin-top:2px;transition:color .3s ease}
+.network-bar{display:flex;gap:18px;font-size:.68rem;font-weight:600}
+.net-tag{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.dot-live{width:7px;height:7px;background:var(--buy);border-radius:50%;animation:ping 2s infinite}
+.dot-live.stale{background:var(--sell);animation:none;box-shadow:0 0 8px var(--sell)}
+@keyframes ping{75%,100%{transform:scale(2);opacity:0}}
+.clock-tag{font-size:.75rem;color:var(--muted);font-weight:600}
+
+#alertContainer{max-width:1720px;margin:14px auto 0;display:flex;flex-direction:column;gap:8px}
+.alert-banner{padding:12px 22px;text-align:center;font-weight:700;font-size:.85rem;border-radius:12px;animation:alertPop .4s}
+@keyframes alertPop{0%{transform:scale(.96);opacity:0}100%{transform:scale(1);opacity:1}}
+.critical-sell-banner{background:linear-gradient(90deg,#660018 0%,#cc0033 100%)!important;color:#fff!important;font-size:1rem!important;font-weight:800!important;padding:16px!important;animation:flashRed .5s infinite alternate!important;box-shadow:0 0 25px rgba(255,59,105,.7)}
+@keyframes flashRed{0%{opacity:.8}100%{opacity:1}}
+
+/* ---------- MAIN GRID ---------- */
+.main-grid{display:grid;grid-template-columns:328px 1fr 360px;gap:18px;margin-top:18px;align-items:start}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.panel{background:var(--s1);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.panel-pad{padding:16px 18px}
+.panel-title{font-size:.72rem;font-weight:700;letter-spacing:.4px;display:flex;align-items:center;gap:6px;margin-bottom:12px}
+
+/* ---------- ALARM / SIM PANELS (LEFT) ---------- */
+.alarm-panel{background:#090204;border:1px solid rgba(255,59,105,.25);padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.vol-panel{background:#020907;border:1px solid rgba(0,255,204,.22);padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.sim-panel{background:#050b18;border:1px solid var(--border);padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.sim-panel.short{background:#110508;border-color:rgba(255,59,105,.25)}
+.alarm-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.alarm-title{font-size:.72rem;font-weight:700;color:var(--sell);letter-spacing:.4px;display:flex;align-items:center;gap:5px}
+.alarm-input-wrapper{display:flex;align-items:center;background:#1a0f13;border:1px solid rgba(255,59,105,.4);border-radius:8px;padding:5px 9px;flex:1}
+.alarm-input{background:transparent;border:none;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.85rem;width:100%;text-align:right;outline:none;min-width:0}
+.alarm-input-wrapper span{font-size:.65rem;color:var(--muted);margin-left:4px;white-space:nowrap}
+.alarm-btn{background:var(--sell);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:all .2s;white-space:nowrap}
+.alarm-btn:hover{opacity:.88;transform:translateY(-1px)}
+.alarm-btn.active{background:#330b14;border:1px solid var(--sell);color:var(--sell)}
+.sim-entry-row{display:flex;gap:10px;align-items:center}
+.sim-entry-info{flex:1;font-size:.7rem;color:var(--muted);text-align:right;line-height:1.3}
+.pnl-box{background:rgba(0,0,0,.3);padding:9px 12px;border-radius:12px;display:flex;justify-content:space-between;align-items:center}
+.pnl-label{font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase}
+.target-label{font-size:.62rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.target-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
+.target-box{background:#0b1426;border:1px solid var(--border);border-radius:10px;padding:7px 4px;text-align:center;cursor:pointer;transition:all .2s}
+.target-box:hover{border-color:var(--border2);transform:translateY(-1px)}
+.target-box.active{border-color:var(--buy);background:rgba(0,255,204,.06)}
+.target-title{font-size:.58rem;font-weight:700;color:var(--muted);text-transform:uppercase}
+.target-price{font-size:.78rem;font-weight:700;color:#fff;margin:2px 0}
+.target-pnl{font-size:.65rem;font-weight:700;color:var(--buy)}
+
+/* ---------- RVOL HERO (CENTER, TOP PRIORITY) ---------- */
+.rvol-hero{background:radial-gradient(circle at 50% 15%,#101a34 0%,var(--s1) 55%,#080c18 100%);border:1px solid var(--border2);border-radius:24px;padding:26px 30px 22px;position:relative;box-shadow:0 0 0 1px rgba(59,153,255,.06),0 30px 90px rgba(0,0,0,.65),inset 0 0 60px rgba(0,20,40,.4);overflow:hidden}
+.rvol-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 30%,rgba(0,255,204,.06),transparent 60%);pointer-events:none;transition:background .4s ease}
+.rvol-hero-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;position:relative;z-index:1}
+.rvol-hero-title{font-size:.78rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+.rvol-hero-title b{color:#fff}
+#rvolPeakChip{font-size:.65rem;font-weight:700;color:var(--gold);background:rgba(255,202,40,.08);border:1px solid rgba(255,202,40,.3);padding:5px 11px;border-radius:9999px}
+.rvol-stage{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:18px;position:relative;z-index:1}
+.rvol-side{display:flex;flex-direction:column;gap:10px}
+.rvol-side-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:14px;padding:10px 12px}
+.rvol-side-label{font-size:.58rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;display:flex;justify-content:space-between}
+.rvol-side-val{font-size:.85rem;font-weight:700;color:#fff;margin-top:3px}
+.rvol-center-col{display:flex;flex-direction:column;align-items:center;min-width:260px}
+.rvol-canvas-box{width:100%;max-width:400px;margin:0 auto;position:relative}
+.rvol-readout{text-align:center;margin-top:-6px}
+#rvolVal{font-size:clamp(2.4rem,4vw,3.6rem);font-weight:800;color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.9);letter-spacing:-1px;line-height:1;transition:color .3s ease}
+.rvol-unit{font-size:.68rem;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:6px}
+#rvolPressureLabel{margin-top:10px;display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.5px;padding:6px 16px;border-radius:9999px;background:rgba(98,119,158,.12);color:var(--muted);border:1px solid rgba(98,119,158,.25);transition:all .3s ease}
+.obi-meter{height:7px;border-radius:9999px;background:var(--sell);overflow:hidden;margin-top:6px;box-shadow:inset 0 1px 2px rgba(0,0,0,.4)}
+#obiFill{height:100%;background:linear-gradient(90deg,var(--buy),#00ccaa);width:50%;transition:width .3s cubic-bezier(.4,0,.2,1)}
+
+/* ---------- FLOW / MOMENTUM ---------- */
+.flow-section{padding:16px 20px}
+.flow-header{display:flex;justify-content:space-between;font-size:.66rem;color:var(--muted);text-transform:uppercase;font-weight:700;margin-bottom:8px}
+.flow-bar-container{height:10px;background:var(--sell);border-radius:9999px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.4)}
+#flowBuyFill{height:100%;background:linear-gradient(90deg,var(--buy),#00ccaa);transition:width .25s cubic-bezier(.4,0,.2,1);box-shadow:0 0 12px var(--buy);width:50%}
+.momentum-banner{padding:13px 20px;font-size:.85rem;font-weight:700;display:flex;align-items:center;gap:9px;transition:all .3s ease;background:#0c1220}
+
+/* ---------- CHART ---------- */
+.chart-section{padding:18px 20px}
+.chart-head{display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);margin-bottom:10px}
+#priceChartCanvas{width:100%;display:block}
+
+/* ---------- RADAR / METRICS / PUMP ---------- */
+.radar-section{padding:16px 20px}
+.radar-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px}
+.radar-node{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center;transition:transform .2s}
+.radar-node:hover{transform:translateY(-2px)}
+.radar-tf{font-size:.58rem;color:var(--muted);font-weight:700;text-transform:uppercase}
+.radar-status{font-size:.85rem;font-weight:700;margin-top:5px}
+#pumpBanner{padding:15px 20px;text-align:center;font-weight:700;font-size:.85rem;background:#0f1320;transition:all .4s ease}
+#pumpBanner.alert{background:linear-gradient(90deg,rgba(192,38,211,.15),rgba(251,146,60,.1));color:var(--pump)}
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.metric-card{background:var(--s1);padding:16px 18px}
+.m-label{font-size:.62rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.m-val{font-size:1rem;font-weight:700;margin-top:4px}
+
+/* ---------- RIGHT COLUMN: SUBMETRICS + WHALES ---------- */
+.submetrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 18px}
+.sub-card{background:var(--s2);border:1px solid rgba(30,43,84,.6);border-radius:12px;padding:10px 12px}
+.sub-label{font-size:.58rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;display:flex;justify-content:space-between}
+.sub-val{font-size:.85rem;font-weight:700;color:#fff;margin-top:3px}
+
+.whale-section{padding:16px 18px;background:#070b18}
+.whale-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:.66rem;color:var(--muted);text-transform:uppercase;font-weight:700}
+.whale-header span:first-child{color:var(--gold);letter-spacing:.3px}
+#whaleBiasFill{height:100%;background:linear-gradient(90deg,var(--buy),#00ccaa);width:50%;transition:width .35s cubic-bezier(.4,0,.2,1);box-shadow:0 0 12px var(--buy)}
+.whale-list{display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto;margin-top:10px}
+.whale-list::-webkit-scrollbar{width:6px}
+.whale-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:9999px}
+.whale-item{display:flex;justify-content:space-between;align-items:center;gap:6px;background:var(--s2);border:1px solid rgba(30,43,84,.6);border-radius:10px;padding:8px 11px;font-size:.7rem;animation:whaleIn .35s ease}
+.whale-item.mega{border-color:var(--gold);box-shadow:0 0 14px rgba(255,202,40,.3);background:rgba(255,202,40,.06)}
+@keyframes whaleIn{0%{opacity:0;transform:translateY(-6px)}100%{opacity:1;transform:translateY(0)}}
+.whale-empty{font-size:.7rem;color:var(--muted);text-align:center;padding:16px 0}
+.whale-side-buy{color:var(--buy);font-weight:700;white-space:nowrap}
+.whale-side-sell{color:var(--sell);font-weight:700;white-space:nowrap}
+.whale-time{color:var(--muted);white-space:nowrap}
+.whale-val{color:#fff;font-weight:700;white-space:nowrap}
+
+.footer{padding:14px 22px;display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);background:rgba(0,0,0,.3);border-radius:20px;margin-top:18px;max-width:1720px;margin-left:auto;margin-right:auto}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width:1400px){
+  .main-grid{grid-template-columns:300px 1fr 320px}
+}
+@media (max-width:1100px){
+  .main-grid{grid-template-columns:1fr}
+  .topbar{flex-wrap:wrap;row-gap:12px}
+}
+@media (max-width:640px){
+  body{padding:12px}
+  .topbar{padding:14px 16px}
+  #priceDisplay{font-size:1.6rem}
+  .rvol-stage{grid-template-columns:1fr}
+  .rvol-side{flex-direction:row}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="version-tag">4H BREAKOUT ENGINE v4.6 PC</div>
+    <div class="pair-block">
+      <div class="pair mono">CKB/USDT</div>
+      <div id="priceDisplay" class="mono">—</div>
+      <div id="priceChange" class="mono">—%</div>
+    </div>
+    <div class="topbar-spacer"></div>
+    <div class="vol-container-top">
+      <div id="liveVolBox" class="live-vol-block-v2">
+        <div class="live-vol-top"><span id="liveVolArrow" style="color:var(--muted)">•</span><span>VOL 10S</span></div>
+        <div id="liveVolVal" class="live-vol-value-v2 mono">0</div>
+      </div>
+      <div class="live-vol-block-v2" style="border-color:rgba(175,122,197,.45)">
+        <div class="live-vol-top"><span style="color:var(--purple)">◴</span><span>VOL 4H</span></div>
+        <div id="vol4h" class="live-vol-value-v2 mono">—</div>
+      </div>
+    </div>
+    <div id="squeezeBadge">COMPRESIÓN: CARGANDO</div>
+    <div class="network-bar">
+      <div class="net-tag" id="liveTag" style="color:var(--buy)"><span id="liveDot" class="dot-live"></span><span id="liveText">EN VIVO</span></div>
+      <div class="net-tag" id="tpsLabel" style="color:var(--purple)">0.0 TPS</div>
+      <div class="net-tag" id="latencyTag" style="color:var(--muted)">LAT: —ms</div>
+      <div class="clock-tag mono" id="clock">--:--:--</div>
+    </div>
+  </div>
+
+  <div id="alertContainer"></div>
+
+  <div class="main-grid">
+
+    <!-- ================= LEFT: HERRAMIENTAS DE TRADING ================= -->
+    <div class="col">
+      <div class="panel alarm-panel">
+        <div class="alarm-row">
+          <div class="alarm-title">🔴 DISPARADOR DE VENTA (TAKE PROFIT)</div>
+          <div id="alarmStatusText" style="font-size:.65rem;font-weight:bold;color:var(--muted)">APAGADA</div>
+        </div>
+        <div class="alarm-row">
+          <div class="alarm-input-wrapper">
+            <input type="number" id="targetPriceInput" class="alarm-input" step="0.000001" placeholder="0.035000">
+            <span>USDT</span>
+          </div>
+          <button id="toggleAlarmBtn" class="alarm-btn">ACTIVAR</button>
+        </div>
+      </div>
+
+      <div class="panel vol-panel">
+        <div class="alarm-row">
+          <div class="alarm-title" style="color:var(--buy)">📊 ALERTA ANOMALÍA VOLUMEN (4H)</div>
+          <div id="volAlarmStatusText" style="font-size:.65rem;font-weight:bold;color:var(--muted)">APAGADA</div>
+        </div>
+        <div class="alarm-row">
+          <div class="alarm-input-wrapper" style="border-color:rgba(0,255,204,.4);background:#0f1a17">
+            <input type="number" id="targetVolPctInput" class="alarm-input" value="300" step="50">
+            <span style="color:var(--buy)">% Extra</span>
+          </div>
+          <button id="toggleVolAlarmBtn" class="alarm-btn" style="background:var(--buy);color:var(--bg)">MONITORIZAR</button>
+        </div>
+      </div>
+
+      <div class="panel sim-panel">
+        <div class="alarm-row">
+          <div class="alarm-title" style="color:var(--blue)">💰 SIMULADOR LONG</div>
+          <button id="btnSetEntry" class="alarm-btn" style="background:var(--blue);padding:5px 10px;font-size:.65rem">FIJAR ENTRADA</button>
+        </div>
+        <div class="sim-entry-row">
+          <div class="alarm-input-wrapper" style="border-color:rgba(59,153,255,.4);background:#0a1224">
+            <span style="font-size:.65rem;color:var(--muted);margin-right:4px">Inversión:</span>
+            <input type="number" id="simCapitalInput" class="alarm-input" value="200" step="50">
+            <span>USD</span>
+          </div>
+        </div>
+        <div class="sim-entry-info">
+          Entrada Long: <span id="lblEntryPrice" class="mono" style="color:#fff;font-weight:600">—</span><br>
+          Tokens: <span id="lblSimTokens" class="mono" style="color:var(--gold);font-weight:600">0 CKB</span>
+        </div>
+        <div class="pnl-box">
+          <span class="pnl-label">Rendimiento actual:</span>
+          <span id="pnlLiveDisplay" class="mono" style="font-size:.95rem;font-weight:bold;color:var(--text)">$0.00 (0.00%)</span>
+        </div>
+        <div>
+          <div class="target-label">🎯 Objetivos por volatilidad (ATR):</div>
+          <div class="target-grid">
+            <div class="target-box" id="boxTP1" onclick="selectTP(1)">
+              <div class="target-title">TP1</div>
+              <div class="target-price mono" id="valTP1Price">—</div>
+              <div class="target-pnl mono" id="valTP1Pnl">+$0.00</div>
+            </div>
+            <div class="target-box" id="boxTP2" onclick="selectTP(2)">
+              <div class="target-title">TP2</div>
+              <div class="target-price mono" id="valTP2Price">—</div>
+              <div class="target-pnl mono" id="valTP2Pnl">+$0.00</div>
+            </div>
+            <div class="target-box" id="boxTP3" onclick="selectTP(3)">
+              <div class="target-title">TP3</div>
+              <div class="target-price mono" id="valTP3Price">—</div>
+              <div class="target-pnl mono" id="valTP3Pnl">+$0.00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel sim-panel short">
+        <div class="alarm-row">
+          <div class="alarm-title" style="color:var(--sell)">📉 SIMULADOR SHORT</div>
+        </div>
+        <div class="sim-entry-row">
+          <div class="alarm-input-wrapper" style="border-color:rgba(255,59,105,.4);background:#1a0a0d">
+            <span style="font-size:.65rem;color:var(--muted);margin-right:4px">Inversión:</span>
+            <input type="number" id="simCapitalShortInput" class="alarm-input" value="200" step="50">
+            <span>USD</span>
+          </div>
+        </div>
+        <div class="sim-entry-info">
+          Entrada Short: <span id="lblEntryShortPrice" class="mono" style="color:#fff;font-weight:600">—</span><br>
+          Tokens: <span id="lblSimShortTokens" class="mono" style="color:var(--gold);font-weight:600">0 CKB</span>
+        </div>
+        <div class="pnl-box">
+          <span class="pnl-label">Rendimiento actual:</span>
+          <span id="pnlLiveShortDisplay" class="mono" style="font-size:.95rem;font-weight:bold;color:var(--text)">$0.00 (0.00%)</span>
+        </div>
+        <div>
+          <div class="target-label" style="color:var(--sell)">🎯 Soportes / salida (ATR):</div>
+          <div class="target-grid">
+            <div class="target-box" id="boxSL1" onclick="selectSL(1)" style="border-color:rgba(255,59,105,.2)">
+              <div class="target-title">SL1</div>
+              <div class="target-price mono" id="valSL1Price">—</div>
+              <div class="target-pnl mono" id="valSL1Pnl" style="color:var(--buy)">+$0.00</div>
+            </div>
+            <div class="target-box" id="boxSL2" onclick="selectSL(2)" style="border-color:rgba(255,59,105,.2)">
+              <div class="target-title">SL2</div>
+              <div class="target-price mono" id="valSL2Price">—</div>
+              <div class="target-pnl mono" id="valSL2Pnl" style="color:var(--buy)">+$0.00</div>
+            </div>
+            <div class="target-box" id="boxSL3" onclick="selectSL(3)" style="border-color:rgba(255,59,105,.2)">
+              <div class="target-title">SL3</div>
+              <div class="target-price mono" id="valSL3Price">—</div>
+              <div class="target-pnl mono" id="valSL3Pnl" style="color:var(--buy)">+$0.00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= CENTRO: RVOL HERO + CHART ================= -->
+    <div class="col">
+
+      <div class="panel rvol-hero" id="rvolBox">
+        <div class="rvol-hero-head">
+          <div class="rvol-hero-title">⚡ <b>RVOL</b> — VOLUMEN RELATIVO EN TIEMPO REAL</div>
+          <div id="rvolPeakChip">PICO SESIÓN: <span id="rvolPeakVal">0.00x</span></div>
+        </div>
+        <div class="rvol-stage">
+          <div class="rvol-side">
+            <div class="rvol-side-card">
+              <div class="sub-label">Volumen 24H</div>
+              <div id="vol24h" class="sub-val mono">—</div>
+            </div>
+            <div class="rvol-side-card">
+              <div class="sub-label">High / Low 24H</div>
+              <div id="highLow24h" class="sub-val mono" style="font-size:.72rem">—</div>
+            </div>
+          </div>
+
+          <div class="rvol-center-col">
+            <div class="rvol-canvas-box">
+              <canvas id="rvolGauge"></canvas>
+            </div>
+            <div class="rvol-readout">
+              <div id="rvolVal" class="mono">0.00x</div>
+              <div class="rvol-unit">MULTIPLICADOR VS. PROMEDIO 10S</div>
+              <div id="rvolPressureLabel">CALIBRANDO…</div>
+            </div>
+          </div>
+
+          <div class="rvol-side">
+            <div class="rvol-side-card">
+              <div class="sub-label"><span>OBI Real (Book)</span><span id="obiSrc" style="color:var(--dim);font-weight:600">esperando…</span></div>
+              <div id="obiVal" class="sub-val mono" style="color:var(--gold)">50% BID</div>
+              <div class="obi-meter"><div id="obiFill"></div></div>
+            </div>
+            <div class="rvol-side-card">
+              <div class="sub-label">Trades activos (10s)</div>
+              <div id="trades30sLabel" class="sub-val mono">Trades: 0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="flow-section">
+          <div class="flow-header"><span>Flujo de Órdenes Agresoras (10s)</span></div>
+          <div class="flow-bar-container"><div id="flowBuyFill"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:.7rem;font-weight:700">
+            <span id="flowBuyPct" style="color:var(--buy)">BUY 50%</span>
+            <span id="flowSellPct" style="color:var(--sell)">SELL 50%</span>
+          </div>
+        </div>
+        <div id="momentumBanner" class="momentum-banner">
+          <span id="momentumArrow">•</span> <span id="momentumText">Momentum neutral</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="chart-section">
+          <div class="chart-head">
+            <span>Velas 4H + Bollinger (20,2) + Volumen</span>
+            <span id="candleInfo" class="mono">—</span>
+          </div>
+          <canvas id="priceChartCanvas"></canvas>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="radar-section">
+          <div class="m-label">⚡ Radar de Ignición</div>
+          <div class="radar-grid">
+            <div class="radar-node"><div class="radar-tf">M15 Momentum</div><div id="radarM15" class="radar-status">Cargando</div></div>
+            <div class="radar-node"><div class="radar-tf">H1 Volumen</div><div id="radarH1" class="radar-status">Cargando</div></div>
+            <div class="radar-node"><div class="radar-tf">Riesgo Squeeze</div><div id="radarSqueeze" class="radar-status">Cargando</div></div>
+          </div>
+        </div>
+        <div id="pumpBanner">Cargando datos reales de Binance...</div>
+        <div class="metrics-grid">
+          <div class="metric-card"><div class="m-label">Rango Promedio ATR</div><div id="atrVal" class="m-val mono" style="color:var(--blue)">—</div></div>
+          <div class="metric-card"><div class="m-label">Ancho Bollinger</div><div id="bbWidthVal" class="m-val mono" style="color:var(--gold)">—</div></div>
+          <div class="metric-card"><div class="m-label">Divergencia Vol</div><div id="volDivLabel" class="m-val">Neutral</div></div>
+          <div class="metric-card"><div class="m-label">Target Breakout</div><div id="breakoutTarget" class="m-val mono" style="color:var(--buy)">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= DERECHA: BALLENAS INSTITUCIONALES ================= -->
+    <div class="col">
+      <div class="panel whale-section">
+        <div class="whale-header">
+          <span>🐋 Detector de Ballenas Institucional</span>
+          <span id="whaleThreshold" class="mono">Umbral: calibrando…</span>
+        </div>
+        <div class="flow-bar-container"><div id="whaleBiasFill"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:.7rem;font-weight:700">
+          <span id="whaleBuyPct" style="color:var(--buy)">COMPRA —</span>
+          <span id="whaleSellPct" style="color:var(--sell)">VENTA —</span>
+        </div>
+        <div id="whaleList" class="whale-list">
+          <div class="whale-empty">Esperando operaciones institucionales…</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-pad">
+          <div class="panel-title">📡 Estado de Sesión</div>
+          <div class="submetrics-grid" style="padding:0;grid-template-columns:1fr">
+            <div class="sub-card">
+              <div class="sub-label">Divergencia de Volumen</div>
+              <div id="volDivLabel2" class="sub-val">Neutral</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <span>Binance • Real-Time • v4.6 PC — RVOL Hero + OBI Real</span>
+    <span>CKB/USDT 4H Breakout Scanner</span>
+  </div>
+</div>
+
+<script>
+const SYMBOL = 'ckbusdt', SYMBOL_U = 'CKBUSDT';
+const el = {};
+
+const idList = ['priceDisplay','priceChange','squeezeBadge','radarM15','radarH1','radarSqueeze','pumpBanner','candleInfo','vol4h','atrVal','bbWidthVal','volDivLabel','breakoutTarget','clock','liveVolArrow','liveVolVal','liveVolBox','tpsLabel','latencyTag','momentumBanner','momentumArrow','momentumText','vol24h','highLow24h','obiVal','obiFill','obiSrc','trades30sLabel','flowBuyFill','flowBuyPct','flowSellPct','rvolVal','rvolGauge','rvolBox','liveDot','liveText','liveTag','whaleThreshold','whaleBiasFill','whaleBuyPct','whaleSellPct','whaleList','rvolPressureLabel','rvolPeakVal'];
+idList.forEach(id => el[id] = document.getElementById(id));
+el['canvas'] = document.getElementById('priceChartCanvas');
+
+const targetPriceInput = document.getElementById('targetPriceInput');
+const toggleAlarmBtn = document.getElementById('toggleAlarmBtn');
+const alarmStatusText = document.getElementById('alarmStatusText');
+
+const targetVolPctInput = document.getElementById('targetVolPctInput');
+const toggleVolAlarmBtn = document.getElementById('toggleVolAlarmBtn');
+const volAlarmStatusText = document.getElementById('volAlarmStatusText');
+
+const simCapitalInput = document.getElementById('simCapitalInput');
+const btnSetEntry = document.getElementById('btnSetEntry');
+const lblEntryPrice = document.getElementById('lblEntryPrice');
+const lblSimTokens = document.getElementById('lblSimTokens');
+const pnlLiveDisplay = document.getElementById('pnlLiveDisplay');
+
+const simCapitalShortInput = document.getElementById('simCapitalShortInput');
+const lblEntryShortPrice = document.getElementById('lblEntryShortPrice');
+const lblSimShortTokens = document.getElementById('lblSimShortTokens');
+const pnlLiveShortDisplay = document.getElementById('pnlLiveShortDisplay');
+
+const ctx = el.canvas.getContext('2d');
+const rvolCtx = el.rvolGauge.getContext('2d');
+const alertContainer = document.getElementById('alertContainer');
+
+const CHART_H = 300, PRICE_H = 232, VOL_H = 52, VOL_TOP = PRICE_H + 12;
+
+let candles4h = [], klines1h = [], klines15m = [], bbWidthHistory = [];
+let currentPrice = 0, lastPrice = 0, lastBB = null, lastATR = null, lastSqueezeRank = 0.5;
+
+let alarmActive = false;
+let targetPrice = 0;
+let audioCtx = null;
+
+let volAlarmActive = false;
+let targetVolPct = 300;
+let simulatedEntryPrice = 0;
+let totalSimulatedTokens = 0;
+
+let hftTrades = [];
+let tradeHead = 0;
+let runningBuyVol = 0, runningSellVol = 0, runningCount = 0;
+const TRADE_WINDOW_MS = 10000;
+const COMPACT_THRESHOLD = 2000;
+
+let tpsCount = 0, tpsRate = 0;
+let currentVol24h = 0, currentHigh24h = 0, currentLow24h = 0;
+let globalAvgVol10s = 322;
+let avgVol4h = 0;
+
+// --- OBI real (bookTicker) ---
+let bestBidQty = 0, bestAskQty = 0, realObiPct = 50, obiHasData = false;
+
+// --- Detector de ballenas institucional ---
+let tradeValueEMA = null;
+const WHALE_EMA_ALPHA = 0.02;
+const WHALE_MULTIPLIER = 7;
+const WHALE_MIN_USDT = 1500;
+const WHALE_MEGA_MULTIPLIER = 2.5;
+const WHALE_BIAS_WINDOW_MS = 5 * 60 * 1000;
+const WHALE_LIST_MAX = 10;
+let whaleTrades = [];
+let lastMegaWhaleAlert = 0;
+let currentWhaleThreshold = WHALE_MIN_USDT;
+
+// --- RVOL peak de sesión ---
+let rvolPeak = 0;
+
+// --- Latencia ---
+let latencyMs = null;
+
+let ws = null, lastMsgTime = Date.now(), heartbeatInterval = null;
+let dirty = false, lastVolSpike = 0;
+let targetRvol = 0, currentAnimatedRvol = 0, rvolIsBuy = true;
+let chartMin = Infinity, chartMax = -Infinity;
+let gaugeW = 380, gaugeH = 214;
+
+let cachedStats = { total: 0, buyPct: 50, sellPct: 50, count: 0 };
+const state = {chg: 0};
+
+function initAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playAlarmSound() {
+  try {
+    initAudio();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    let osc = audioCtx.createOscillator();
+    let gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.15);
+  } catch(e) {}
+}
+
+function playWhaleSound() {
+  try {
+    initAudio();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    let osc = audioCtx.createOscillator();
+    let gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.45);
+    gain.gain.setValueAtTime(0.32, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.45);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.45);
+  } catch(e) {}
+}
+
+function playVolAlarmSound() {
+  try {
+    initAudio();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    let osc = audioCtx.createOscillator();
+    let gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.1);
+  } catch(e) {}
+}
+
+toggleAlarmBtn.addEventListener('click', () => {
+  initAudio();
+  if (!alarmActive) {
+    const val = parseFloat(targetPriceInput.value);
+    if (isNaN(val) || val <= 0) {
+      alert("Por favor introduce un precio de venta válido.");
+      return;
+    }
+    targetPrice = val;
+    alarmActive = true;
+    toggleAlarmBtn.textContent = "DESACTIVAR";
+    toggleAlarmBtn.classList.add('active');
+    alarmStatusText.textContent = `ESPERANDO > ${targetPrice.toFixed(6)}`;
+    alarmStatusText.style.color = 'var(--gold)';
+  } else {
+    disableAlarm();
+  }
+});
+
+function disableAlarm() {
+  alarmActive = false;
+  toggleAlarmBtn.textContent = "ACTIVAR";
+  toggleAlarmBtn.classList.remove('active');
+  alarmStatusText.textContent = "APAGADA";
+  alarmStatusText.style.color = 'var(--muted)';
+
+  const crit = document.querySelector('.critical-sell-banner');
+  if(crit) crit.remove();
+}
+
+toggleVolAlarmBtn.addEventListener('click', () => {
+  initAudio();
+  if (!volAlarmActive) {
+    const val = parseFloat(targetVolPctInput.value);
+    if (isNaN(val) || val < 0) {
+      alert("Introduce un porcentaje de incremento válido.");
+      return;
+    }
+    targetVolPct = val;
+    volAlarmActive = true;
+    toggleVolAlarmBtn.textContent = "DETENER";
+    toggleVolAlarmBtn.style.background = '#0d2b14';
+    toggleVolAlarmBtn.style.color = 'var(--buy)';
+    volAlarmStatusText.textContent = `MÉTRICA 4H > +${targetVolPct}%`;
+    volAlarmStatusText.style.color = 'var(--buy)';
+  } else {
+    volAlarmActive = false;
+    toggleVolAlarmBtn.textContent = "MONITORIZAR";
+    toggleVolAlarmBtn.style.background = 'var(--buy)';
+    toggleVolAlarmBtn.style.color = 'var(--bg)';
+    volAlarmStatusText.textContent = "APAGADA";
+    volAlarmStatusText.style.color = 'var(--muted)';
+  }
+});
+
+btnSetEntry.addEventListener('click', () => {
+  initAudio();
+  if (currentPrice > 0) {
+    simulatedEntryPrice = currentPrice;
+    lblEntryPrice.textContent = simulatedEntryPrice.toFixed(6);
+    lblEntryShortPrice.textContent = simulatedEntryPrice.toFixed(6);
+    recalculatePosition(true);
+    recalculateShortPosition();
+    createAlert(`📌 Precio de entrada fijado en: <b>${simulatedEntryPrice.toFixed(6)} USDT</b>`, 'neutral');
+  }
+});
+
+simCapitalInput.addEventListener('input', () => { recalculatePosition(false); });
+simCapitalShortInput.addEventListener('input', () => { recalculateShortPosition(); });
+
+function recalculatePosition(forceResetPrice = false) {
+  if (currentPrice <= 0) return;
+  if (simulatedEntryPrice === 0 || forceResetPrice) {
+    simulatedEntryPrice = currentPrice;
+    lblEntryPrice.textContent = simulatedEntryPrice.toFixed(6);
+    lblEntryShortPrice.textContent = simulatedEntryPrice.toFixed(6);
+  }
+  const capital = parseFloat(simCapitalInput.value);
+  if (!isNaN(capital) && capital > 0) {
+    totalSimulatedTokens = capital / simulatedEntryPrice;
+    lblSimTokens.textContent = totalSimulatedTokens.toLocaleString('es-ES', {maximumFractionDigits: 1}) + ' CKB';
+  }
+  dirty = true;
+}
+
+function recalculateShortPosition() {
+  if (currentPrice <= 0 || simulatedEntryPrice === 0) return;
+
+  lblEntryShortPrice.textContent = simulatedEntryPrice.toFixed(6);
+  const capital = parseFloat(simCapitalShortInput.value);
+
+  if (!isNaN(capital) && capital > 0) {
+    const tokens = capital / simulatedEntryPrice;
+    lblSimShortTokens.textContent = tokens.toLocaleString('es-ES', {maximumFractionDigits: 1}) + ' CKB';
+
+    const currentPnLUsdt = (simulatedEntryPrice - currentPrice) * tokens;
+    const currentPnLPct = ((simulatedEntryPrice - currentPrice) / simulatedEntryPrice) * 100;
+
+    pnlLiveShortDisplay.textContent = `${currentPnLUsdt >= 0 ? '+' : ''}$${currentPnLUsdt.toFixed(2)} (${currentPnLPct >= 0 ? '+' : ''}${currentPnLPct.toFixed(2)}%)`;
+    pnlLiveShortDisplay.style.color = currentPnLUsdt >= 0 ? 'var(--buy)' : 'var(--sell)';
+  }
+  dirty = true;
+}
+
+function selectTP(number) {
+  initAudio();
+  const targetElement = document.getElementById(`valTP${number}Price`);
+  if (targetElement && targetElement.textContent !== '—') {
+    const recommendedPrice = parseFloat(targetElement.textContent);
+    targetPriceInput.value = recommendedPrice.toFixed(6);
+    if(alarmActive) disableAlarm();
+    targetPrice = recommendedPrice;
+    alarmActive = true;
+    toggleAlarmBtn.textContent = "DESACTIVAR";
+    toggleAlarmBtn.classList.add('active');
+    alarmStatusText.textContent = `ESPERANDO > ${targetPrice.toFixed(6)}`;
+    alarmStatusText.style.color = 'var(--gold)';
+    createAlert(`🎯 Objetivo TP${number} seleccionado y acoplado a la alarma principal.`, 'buy');
+  }
+}
+
+function selectSL(number) {
+  initAudio();
+  const targetElement = document.getElementById(`valSL${number}Price`);
+  if (targetElement && targetElement.textContent !== '—') {
+    const recommendedPrice = parseFloat(targetElement.textContent);
+    targetPriceInput.value = recommendedPrice.toFixed(6);
+    if(alarmActive) disableAlarm();
+    targetPrice = recommendedPrice;
+    alarmActive = true;
+    toggleAlarmBtn.textContent = "DESACTIVAR";
+    toggleAlarmBtn.classList.add('active');
+    alarmStatusText.textContent = `ESPERANDO > ${targetPrice.toFixed(6)}`;
+    alarmStatusText.style.color = 'var(--gold)';
+    createAlert(`🎯 Soporte SL${number} asignado a la Alarma General.`, 'sell');
+  }
+}
+
+function createAlert(text, type = 'neutral') {
+  const alert = document.createElement('div');
+  alert.className = 'alert-banner';
+  if (type === 'critical-sell') alert.className += ' critical-sell-banner';
+  else if (type === 'buy') alert.style.background = 'rgba(0,255,204,0.15)';
+  else if (type === 'sell') alert.style.background = 'rgba(255,59,105,0.15)';
+  else alert.style.background = 'rgba(255,202,40,0.15)';
+
+  if (type !== 'critical-sell') {
+    alert.style.color = type === 'buy' ? 'var(--buy)' : type === 'sell' ? 'var(--sell)' : 'var(--gold)';
+  }
+
+  alert.innerHTML = text;
+  alertContainer.insertBefore(alert, alertContainer.firstChild);
+
+  if (type !== 'critical-sell') {
+    setTimeout(() => alert.remove(), 6000);
+  }
+}
+
+async function fetchKlines(interval, limit) {
+  try {
+    const r = await fetch(`https://api.binance.com/api/v3/klines?symbol=${SYMBOL_U}&interval=${interval}&limit=${limit}`);
+    const d = await r.json();
+    return d.map(k => ({t: k[0], o: +k[1], h: +k[2], l: +k[3], c: +k[4], v: +k[5]}));
+  } catch(e) { return []; }
+}
+
+async function bootstrap() {
+  try {
+    el.pumpBanner.textContent = 'Enlazando con el nodo central de Binance...';
+    const [c4, c1, c15] = await Promise.all([
+      fetchKlines('4h', 30),
+      fetchKlines('1h', 30),
+      fetchKlines('15m', 30)
+    ]);
+    candles4h = c4; klines1h = c1; klines15m = c15;
+
+    if (candles4h.length) {
+      currentPrice = lastPrice = candles4h.at(-1).c;
+      targetPriceInput.value = (currentPrice * 1.05).toFixed(6);
+      recalculatePosition(true);
+      recalculateShortPosition();
+      computeAvgVol4h();
+    }
+    if (klines1h.length) {
+      const avgVol1h = klines1h.reduce((a, b) => a + b.v, 0) / klines1h.length;
+      globalAvgVol10s = Math.max(45, avgVol1h / 360);
+    }
+
+    computeIndicators(true);
+    updateRadarInfo();
+    dirty = true;
+    el.pumpBanner.textContent = '⚡ ESCÁNER ESTABLE HFT ACTIVO (10s + 4H) — OBI REAL';
+    el.pumpBanner.style.color = 'var(--buy)';
+  } catch (err) {
+    el.pumpBanner.textContent = '⚠️ Error de red API. Reintentando...';
+    setTimeout(bootstrap, 3000);
+  }
+}
+
+function computeAvgVol4h() {
+  if (candles4h.length < 5) return;
+  const recentVolumes = candles4h.slice(-12).map(c => c.v);
+  avgVol4h = recentVolumes.reduce((a, b) => a + b, 0) / recentVolumes.length;
+}
+
+function sma(a) { return a.reduce((x, y) => x + y, 0) / a.length; }
+
+function bollinger(c, p = 20) {
+  if (c.length < p) return null;
+  const cl = c.slice(-p).map(x => x.c);
+  const mi = sma(cl);
+  const sd = Math.sqrt(cl.reduce((x, y) => x + (y - mi) ** 2, 0) / cl.length);
+  return { mi, up: mi + 2 * sd, lo: mi - 2 * sd, width: (4 * sd / mi) * 100 };
+}
+
+function atr(c, p = 14) {
+  if (c.length < p + 1) return null;
+  let sum = 0;
+  for (let i = c.length - p; i < c.length; i++) {
+    const cu = c[i], pr = c[i - 1];
+    sum += Math.max(cu.h - cu.l, Math.abs(cu.h - pr.c), Math.abs(cu.l - pr.c));
+  }
+  return sum / p;
+}
+
+function computeIndicators(isClosed) {
+  if(!candles4h.length) return;
+  lastBB = bollinger(candles4h);
+  if (lastBB) {
+    if (isClosed) {
+      bbWidthHistory.push(lastBB.width);
+      if (bbWidthHistory.length > 60) bbWidthHistory.shift();
+    }
+    lastSqueezeRank = bbWidthHistory.length ? bbWidthHistory.filter(v => v < lastBB.width).length / bbWidthHistory.length : 0.5;
+  }
+  lastATR = atr(candles4h);
+
+  chartMin = Infinity; chartMax = -Infinity;
+  candles4h.forEach(c => {
+    if (c.l < chartMin) chartMin = c.l;
+    if (c.h > chartMax) chartMax = c.h;
+  });
+  if(lastBB) {
+    if(lastBB.lo < chartMin) chartMin = lastBB.lo;
+    if(lastBB.up > chartMax) chartMax = lastBB.up;
+  }
+  const pad = (chartMax - chartMin) * 0.06;
+  chartMin -= pad; chartMax += pad;
+}
+
+function pushHftTrade(qty, isBuyerMaker, price) {
+  tpsCount++;
+  const isBuy = !isBuyerMaker;
+  hftTrades.push({ t: Date.now(), qty, isBuy });
+  if (isBuy) runningBuyVol += qty; else runningSellVol += qty;
+  runningCount++;
+
+  const value = qty * (price || currentPrice || 0);
+  if (value > 0) {
+    tradeValueEMA = tradeValueEMA === null ? value : (tradeValueEMA * (1 - WHALE_EMA_ALPHA) + value * WHALE_EMA_ALPHA);
+    currentWhaleThreshold = Math.max(WHALE_MIN_USDT, tradeValueEMA * WHALE_MULTIPLIER);
+    if (value >= currentWhaleThreshold) {
+      registerWhale(value, isBuy, qty, price, currentWhaleThreshold);
+    }
+  }
+}
+
+function registerWhale(value, isBuy, qty, price, threshold) {
+  const mega = value >= threshold * WHALE_MEGA_MULTIPLIER;
+  whaleTrades.unshift({ t: Date.now(), value, isBuy, qty, price, mega });
+  if (whaleTrades.length > 60) whaleTrades.length = 60;
+
+  if (mega && Date.now() - lastMegaWhaleAlert > 4000) {
+    lastMegaWhaleAlert = Date.now();
+    playWhaleSound();
+    createAlert(`🐋 BALLENA INSTITUCIONAL: ${isBuy ? 'COMPRA' : 'VENTA'} de $${formatUSD(value)} USDT en un solo bloque`, isBuy ? 'buy' : 'sell');
+  }
+  renderWhaleList();
+  dirty = true;
+}
+
+function formatUSD(v) {
+  if (v >= 1e6) return (v / 1e6).toFixed(2) + 'M';
+  if (v >= 1e3) return (v / 1e3).toFixed(1) + 'K';
+  return v.toFixed(0);
+}
+
+function renderWhaleList() {
+  if (!whaleTrades.length) {
+    el.whaleList.innerHTML = '<div class="whale-empty">Esperando operaciones institucionales…</div>';
+    return;
+  }
+  const items = whaleTrades.slice(0, WHALE_LIST_MAX).map(w => {
+    const timeStr = new Date(w.t).toLocaleTimeString('es-ES', { hour12: false });
+    const sideHtml = w.isBuy ? '<span class="whale-side-buy">🟢 COMPRA</span>' : '<span class="whale-side-sell">🔴 VENTA</span>';
+    return `<div class="whale-item${w.mega ? ' mega' : ''}">
+      <span class="whale-time mono">${timeStr}</span>
+      ${sideHtml}
+      <span class="whale-val mono">$${formatUSD(w.value)}</span>
+    </div>`;
+  }).join('');
+  el.whaleList.innerHTML = items;
+}
+
+function computeWhaleBias() {
+  const cutoff = Date.now() - WHALE_BIAS_WINDOW_MS;
+  let buyVal = 0, sellVal = 0;
+  for (const w of whaleTrades) {
+    if (w.t < cutoff) break;
+    if (w.isBuy) buyVal += w.value; else sellVal += w.value;
+  }
+  const total = buyVal + sellVal;
+  return { buyVal, sellVal, total, buyPct: total ? (buyVal / total) * 100 : 50 };
+}
+
+function refreshTradeWindow() {
+  const limitTime = Date.now() - TRADE_WINDOW_MS;
+  while (tradeHead < hftTrades.length && hftTrades[tradeHead].t < limitTime) {
+    const tr = hftTrades[tradeHead];
+    if (tr.isBuy) runningBuyVol -= tr.qty; else runningSellVol -= tr.qty;
+    runningCount--;
+    tradeHead++;
+  }
+  if (tradeHead > COMPACT_THRESHOLD) {
+    hftTrades = hftTrades.slice(tradeHead);
+    tradeHead = 0;
+  }
+  if (runningBuyVol < 0) runningBuyVol = 0;
+  if (runningSellVol < 0) runningSellVol = 0;
+  if (runningCount < 0) runningCount = 0;
+
+  const total = runningBuyVol + runningSellVol;
+  cachedStats = {
+    total,
+    buyPct: total ? (runningBuyVol / total) * 100 : 50,
+    sellPct: total ? (runningSellVol / total) * 100 : 50,
+    count: runningCount
+  };
+}
+
+function updateRadarInfo() {
+  if (!klines15m.length || !klines1h.length) return;
+  const c15 = klines15m.at(-1), p15 = klines15m.at(-3);
+  if(!c15 || !p15) return;
+  const m15Bullish = c15.c >= p15.c;
+  el.radarM15.textContent = m15Bullish ? 'ALZA' : 'BAJA';
+  el.radarM15.style.color = m15Bullish ? 'var(--buy)' : 'var(--sell)';
+
+  const avgH1Vol = sma(klines1h.map(k => k.v));
+  const curH1Vol = klines1h.at(-1).v;
+  const volSpike = curH1Vol > avgH1Vol * 1.25;
+  el.radarH1.textContent = volSpike ? 'SPIKE' : 'NORMAL';
+  el.radarH1.style.color = volSpike ? 'var(--gold)' : 'var(--text)';
+
+  const sq = lastSqueezeRank <= 0.35;
+  el.radarSqueeze.textContent = sq ? 'ALTO' : 'BAJO';
+  el.radarSqueeze.style.color = sq ? 'var(--pump)' : 'var(--muted)';
+}
+
+function checkAlerts() {
+  if (!lastPrice || !currentPrice) return;
+
+  if (alarmActive && currentPrice >= targetPrice) {
+    playAlarmSound();
+    if (!document.querySelector('.critical-sell-banner')) {
+      createAlert(`🚨 🔴 ¡HORA DE VENDER! El precio (${currentPrice.toFixed(6)}) alcanzó tu objetivo de venta de ${targetPrice.toFixed(6)} USDT`, 'critical-sell');
+      alarmStatusText.textContent = "💥 ¡DISPARADA! VENDER";
+      alarmStatusText.style.color = 'var(--sell)';
+    }
+  }
+
+  const changePct = ((currentPrice - lastPrice) / lastPrice) * 100;
+  if (Math.abs(changePct) > 0.35) {
+    const type = changePct > 0 ? 'buy' : 'sell';
+    createAlert(`🚨 Movimiento detectado: ${changePct > 0 ? '↑' : '↓'} ${changePct.toFixed(2)}%`, type);
+  }
+  lastPrice = currentPrice;
+
+  const current10sVol = cachedStats.total;
+  const volIncrementPct10s = globalAvgVol10s > 0 ? ((current10sVol - globalAvgVol10s) / globalAvgVol10s) * 100 : 0;
+
+  const latest4h = candles4h.at(-1);
+  let volIncrementPct4h = 0;
+  if (latest4h && avgVol4h > 0) {
+    volIncrementPct4h = ((latest4h.v - avgVol4h) / avgVol4h) * 100;
+  }
+
+  if (volAlarmActive && (volIncrementPct4h >= targetVolPct || volIncrementPct10s >= targetVolPct * 0.6) && Date.now() - lastVolSpike > 5000) {
+    lastVolSpike = Date.now();
+    playVolAlarmSound();
+    const mainPct = volIncrementPct4h > volIncrementPct10s ? volIncrementPct4h : volIncrementPct10s;
+    const timeframe = volIncrementPct4h >= targetVolPct ? '4H' : 'HFT 10s';
+    createAlert(`🔥 ¡ANOMALÍA 4H CAPTURADA!: Inyección masiva de volumen CKB (+${mainPct.toFixed(0)}%) en ${timeframe}`, 'buy');
+  }
+
+  if (obiHasData) {
+    if (realObiPct >= 75 && Date.now() - lastObiAlert > 8000) {
+      lastObiAlert = Date.now();
+      createAlert(`🧱 Pared de COMPRA detectada en el libro (OBI ${realObiPct.toFixed(0)}%)`, 'buy');
+    } else if (realObiPct <= 25 && Date.now() - lastObiAlert > 8000) {
+      lastObiAlert = Date.now();
+      createAlert(`🧱 Pared de VENTA detectada en el libro (OBI ${realObiPct.toFixed(0)}%)`, 'sell');
+    }
+  }
+}
+let lastObiAlert = 0;
+
+// --- Reconexión con backoff exponencial + fallback de puerto ---
+let reconnectAttempts = 0;
+const RECONNECT_BASE_MS = 500;
+const RECONNECT_MAX_MS = 10000;
+const WS_PORTS = [443, 9443];
+let wsPortIndex = 0;
+let connectWatchdog = null;
+
+function connect() {
+  if (ws) {
+    try { clearInterval(heartbeatInterval); ws.onclose = null; ws.onerror = null; ws.close(); } catch(e){}
+  }
+  clearTimeout(connectWatchdog);
+
+  const port = WS_PORTS[wsPortIndex % WS_PORTS.length];
+  const streams = [`${SYMBOL}@ticker`, `${SYMBOL}@aggTrade`, `${SYMBOL}@bookTicker`, `${SYMBOL}@kline_15m`, `${SYMBOL}@kline_1h`, `${SYMBOL}@kline_4h`].join('/');
+  ws = new WebSocket(`wss://stream.binance.com:${port}/stream?streams=${streams}`);
+  el.liveText.textContent = `CONECTANDO (:${port})...`;
+
+  connectWatchdog = setTimeout(() => {
+    if (ws && ws.readyState !== WebSocket.OPEN) {
+      wsPortIndex++;
+      try { ws.close(); } catch(e){}
+      forceReconnect(true);
+    }
+  }, 4000);
+
+  ws.onopen = () => {
+    clearTimeout(connectWatchdog);
+    lastMsgTime = Date.now();
+    reconnectAttempts = 0;
+    el.liveDot.classList.remove('stale');
+    el.liveText.textContent = 'EN VIVO';
+    el.liveTag.style.color = 'var(--buy)';
+
+    clearInterval(heartbeatInterval);
+    heartbeatInterval = setInterval(() => {
+      const timePassed = Date.now() - lastMsgTime;
+      if (timePassed > 5000) {
+        el.liveText.textContent = 'CONEXIÓN MUERTA';
+        forceReconnect();
+      }
+    }, 2500);
+  };
+
+  ws.onmessage = e => {
+    lastMsgTime = Date.now();
+    const m = JSON.parse(e.data), d = m.data, s = m.stream;
+    if (!d) return;
+
+    if (s.endsWith('@ticker')) {
+      currentPrice = +d.c;
+      state.chg = +d.P;
+      currentVol24h = +d.v;
+      currentHigh24h = +d.h;
+      currentLow24h = +d.l;
+      if (d.E) latencyMs = Math.max(0, Date.now() - d.E);
+    } else if (s.endsWith('@aggTrade')) {
+      pushHftTrade(+d.q, d.m, +d.p);
+    } else if (s.endsWith('@bookTicker')) {
+      bestBidQty = +d.B;
+      bestAskQty = +d.A;
+      const totalBook = bestBidQty + bestAskQty;
+      if (totalBook > 0) {
+        realObiPct = (bestBidQty / totalBook) * 100;
+        obiHasData = true;
+      }
+    } else if (s.endsWith('@kline_15m')) {
+      updateKlineArray(klines15m, d.k);
+    } else if (s.endsWith('@kline_1h')) {
+      updateKlineArray(klines1h, d.k);
+    } else if (s.endsWith('@kline_4h')) {
+      updateKlineArray(candles4h, d.k);
+      computeIndicators(d.k.x);
+      if (d.k.x) computeAvgVol4h();
+    }
+    dirty = true;
+  };
+
+  ws.onclose = () => { forceReconnect(); };
+  ws.onerror = () => { forceReconnect(); };
+}
+
+let reconnectionTimeout = null;
+function forceReconnect(immediate) {
+  clearInterval(heartbeatInterval);
+  clearTimeout(connectWatchdog);
+  el.liveDot.classList.add('stale');
+  el.liveTag.style.color = 'var(--sell)';
+
+  clearTimeout(reconnectionTimeout);
+  if (immediate) {
+    el.liveText.textContent = 'PROBANDO PUERTO ALTERNATIVO...';
+    reconnectionTimeout = setTimeout(() => connect(), 150);
+    return;
+  }
+  const delay = Math.min(RECONNECT_BASE_MS * Math.pow(2, reconnectAttempts), RECONNECT_MAX_MS);
+  reconnectAttempts++;
+  el.liveText.textContent = `RECONECTANDO (${(delay/1000).toFixed(1)}s)...`;
+  reconnectionTimeout = setTimeout(() => {
+    connect();
+  }, delay);
+}
+
+window.addEventListener('online', () => {
+  reconnectAttempts = 0;
+  wsPortIndex = 0;
+  forceReconnect(true);
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && (!ws || ws.readyState !== WebSocket.OPEN || Date.now() - lastMsgTime > 6000)) {
+    reconnectAttempts = 0;
+    forceReconnect(true);
+  }
+});
+
+function updateKlineArray(a, k) {
+  const c = {t: k.t, o: +k.o, h: +k.h, l: +k.l, c: +k.c, v: +k.v};
+  if (a.length && a.at(-1).t === c.t) a[a.length - 1] = c;
+  else { a.push(c); if (a.length > 40) a.shift(); }
+}
+
+function formatVol(v) {
+  if (v >= 1e6) return (v / 1e6).toFixed(2) + 'M';
+  if (v >= 1e3) return (v / 1e3).toFixed(1) + 'K';
+  return v.toFixed(0);
+}
+
+// ---------- RVOL GAUGE REDISEÑADO: arco con gradiente, marcas 0-4x, puck y glow ----------
+function drawRvolGauge(r, isB) {
+  const ratio = window.devicePixelRatio || 1;
+  rvolCtx.clearRect(0, 0, el.rvolGauge.width, el.rvolGauge.height);
+  rvolCtx.save();
+  rvolCtx.scale(ratio, ratio);
+
+  const cx = gaugeW / 2, cy = gaugeH * 0.80, rad = gaugeW * 0.35;
+  const startA = Math.PI * 1.05, endA = Math.PI * 1.95, sweep = endA - startA;
+  const p = Math.min(Math.max(r / 4, 0), 1);
+  const col = isB ? '#00ffcc' : '#ff3b69';
+  const colDim = isB ? '#046b5f' : '#7a0f28';
+  const glow = isB ? 'rgba(0,255,204,0.55)' : 'rgba(255,59,105,0.55)';
+  const lw = Math.max(8, gaugeW * 0.06);
+
+  // pista base
+  rvolCtx.strokeStyle = '#121a2e'; rvolCtx.lineWidth = lw; rvolCtx.lineCap = 'round';
+  rvolCtx.beginPath(); rvolCtx.arc(cx, cy, rad, startA, endA); rvolCtx.stroke();
+
+  // marcas + etiquetas 0x..4x
+  rvolCtx.font = `700 ${Math.max(9, gaugeW * 0.03)}px 'JetBrains Mono', monospace`;
+  rvolCtx.textAlign = 'center'; rvolCtx.textBaseline = 'middle';
+  for (let i = 0; i <= 4; i++) {
+    const a = startA + sweep * (i / 4);
+    const t1x = cx + Math.cos(a) * (rad + lw * 0.65), t1y = cy + Math.sin(a) * (rad + lw * 0.65);
+    const t2x = cx + Math.cos(a) * (rad - lw * 0.65), t2y = cy + Math.sin(a) * (rad - lw * 0.65);
+    rvolCtx.strokeStyle = i / 4 <= p ? '#0a0f1d' : '#232c46';
+    rvolCtx.lineWidth = 2;
+    rvolCtx.beginPath(); rvolCtx.moveTo(t1x, t1y); rvolCtx.lineTo(t2x, t2y); rvolCtx.stroke();
+
+    const lx = cx + Math.cos(a) * (rad + lw * 1.35), ly = cy + Math.sin(a) * (rad + lw * 1.35);
+    rvolCtx.fillStyle = '#3b4e75';
+    rvolCtx.fillText(i + 'x', lx, ly);
+  }
+
+  if (p > 0) {
+    const grad = rvolCtx.createLinearGradient(cx - rad, cy, cx + rad, cy);
+    grad.addColorStop(0, colDim);
+    grad.addColorStop(1, col);
+
+    rvolCtx.shadowBlur = gaugeW * 0.085; rvolCtx.shadowColor = glow;
+    rvolCtx.strokeStyle = grad; rvolCtx.lineWidth = lw; rvolCtx.lineCap = 'round';
+    rvolCtx.beginPath(); rvolCtx.arc(cx, cy, rad, startA, startA + sweep * p); rvolCtx.stroke();
+
+    rvolCtx.shadowBlur = 0; rvolCtx.strokeStyle = '#ffffff'; rvolCtx.lineWidth = Math.max(2, lw * 0.16);
+    rvolCtx.beginPath(); rvolCtx.arc(cx, cy, rad, startA, startA + sweep * p); rvolCtx.stroke();
+
+    // puck en la punta del arco
+    const endAng = startA + sweep * p;
+    const px = cx + Math.cos(endAng) * rad, py = cy + Math.sin(endAng) * rad;
+    rvolCtx.shadowBlur = gaugeW * 0.1; rvolCtx.shadowColor = glow;
+    rvolCtx.fillStyle = '#fff';
+    rvolCtx.beginPath(); rvolCtx.arc(px, py, Math.max(3.5, lw * 0.32), 0, Math.PI * 2); rvolCtx.fill();
+    rvolCtx.shadowBlur = 0;
+  }
+  rvolCtx.restore();
+}
+
+function drawChart() {
+  if (!candles4h.length) return;
+  const w = el.canvas.width / (window.devicePixelRatio || 1), h = CHART_H;
+  ctx.clearRect(0, 0, w, h);
+
+  const rg = (chartMax - chartMin) || 1;
+  const cw = w / candles4h.length;
+  const maxVol = Math.max(...candles4h.map(c => c.v), 1);
+
+  if (lastBB) {
+    ctx.strokeStyle = 'rgba(175,122,197,.35)'; ctx.setLineDash([4,5]); ctx.lineWidth = 1.3;
+    const yu = PRICE_H - 10 - ((lastBB.up - chartMin) / rg) * (PRICE_H - 20);
+    const yl = PRICE_H - 10 - ((lastBB.lo - chartMin) / rg) * (PRICE_H - 20);
+    ctx.beginPath(); ctx.moveTo(0, yu); ctx.lineTo(w, yu); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, yl); ctx.lineTo(w, yl); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  if (alarmActive && targetPrice >= chartMin && targetPrice <= chartMax) {
+    ctx.strokeStyle = 'rgba(255, 59, 105, 0.6)'; ctx.lineWidth = 1.6; ctx.setLineDash([5, 3]);
+    const yAlarm = PRICE_H - 10 - ((targetPrice - chartMin) / rg) * (PRICE_H - 20);
+    ctx.beginPath(); ctx.moveTo(0, yAlarm); ctx.lineTo(w, yAlarm); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  if (simulatedEntryPrice >= chartMin && simulatedEntryPrice <= chartMax) {
+    ctx.strokeStyle = 'rgba(59, 153, 255, 0.5)'; ctx.lineWidth = 1.3;
+    const yEntry = PRICE_H - 10 - ((simulatedEntryPrice - chartMin) / rg) * (PRICE_H - 20);
+    ctx.beginPath(); ctx.moveTo(0, yEntry); ctx.lineTo(w, yEntry); ctx.stroke();
+  }
+
+  candles4h.forEach((c, i) => {
+    const x = i * cw + cw / 2;
+    const yo = PRICE_H - 10 - ((c.o - chartMin) / rg) * (PRICE_H - 20);
+    const yc = PRICE_H - 10 - ((c.c - chartMin) / rg) * (PRICE_H - 20);
+    const yh = PRICE_H - 10 - ((c.h - chartMin) / rg) * (PRICE_H - 20);
+    const yl = PRICE_H - 10 - ((c.l - chartMin) / rg) * (PRICE_H - 20);
+
+    const isBull = c.c >= c.o;
+    const barCol = isBull ? '#00ffcc' : '#ff3b69';
+    ctx.strokeStyle = ctx.fillStyle = barCol;
+    ctx.lineWidth = 1.8;
+
+    ctx.beginPath(); ctx.moveTo(x, yh); ctx.lineTo(x, yl); ctx.stroke();
+    ctx.fillRect(x - cw * 0.32, Math.min(yo, yc), cw * 0.64, Math.max(Math.abs(yc - yo), 1.6));
+
+    const vh = (c.v / maxVol) * VOL_H;
+    ctx.globalAlpha = 0.55;
+    ctx.fillStyle = barCol;
+    ctx.fillRect(x - cw * 0.32, VOL_TOP + (VOL_H - vh), cw * 0.64, vh);
+    ctx.globalAlpha = 1;
+  });
+
+  const lastCandle = candles4h.at(-1);
+  if(lastCandle) el.candleInfo.textContent = `C: ${lastCandle.c.toFixed(6)}`;
+}
+
+function updateUI() {
+  if (!currentPrice) return;
+
+  el.priceDisplay.textContent = currentPrice.toFixed(6);
+  el.priceChange.textContent = (state.chg >= 0 ? '+' : '') + state.chg.toFixed(2) + '%';
+  el.priceChange.style.color = state.chg >= 0 ? 'var(--buy)' : 'var(--sell)';
+  el.priceDisplay.style.textShadow = state.chg >= 0 ? '0 0 18px rgba(0,255,204,.35)' : '0 0 18px rgba(255,59,105,.35)';
+
+  const st = cachedStats;
+  const isB = st.buyPct >= 50;
+  const activeColor = isB ? 'var(--buy)' : 'var(--sell)';
+  const activeBorder = isB ? 'rgba(0, 255, 204, 0.4)' : 'rgba(255, 59, 105, 0.4)';
+
+  el.liveVolVal.textContent = formatVol(st.total);
+  el.liveVolVal.style.color = activeColor;
+  el.liveVolBox.style.borderColor = activeBorder;
+  el.liveVolArrow.textContent = isB ? '▲' : '▼';
+  el.liveVolArrow.style.color = activeColor;
+
+  const cr = Math.max(0.01, st.total / globalAvgVol10s);
+  targetRvol = cr; rvolIsBuy = isB;
+  el.rvolVal.textContent = `${cr.toFixed(2)}x`;
+  el.rvolVal.style.color = activeColor;
+  el.rvolBox.style.borderColor = activeBorder;
+
+  if (cr > rvolPeak) rvolPeak = cr;
+  el.rvolPeakVal.textContent = `${rvolPeak.toFixed(2)}x`;
+
+  if (cr >= 3) {
+    el.rvolPressureLabel.textContent = isB ? '🔥 PRESIÓN COMPRADORA EXTREMA' : '🔥 PRESIÓN VENDEDORA EXTREMA';
+  } else if (cr >= 1.8) {
+    el.rvolPressureLabel.textContent = isB ? '▲ PRESIÓN COMPRADORA ALTA' : '▼ PRESIÓN VENDEDORA ALTA';
+  } else if (cr >= 1) {
+    el.rvolPressureLabel.textContent = isB ? 'ACTIVIDAD COMPRADORA NORMAL' : 'ACTIVIDAD VENDEDORA NORMAL';
+  } else {
+    el.rvolPressureLabel.textContent = 'VOLUMEN POR DEBAJO DEL PROMEDIO';
+  }
+  el.rvolPressureLabel.style.color = cr >= 1.8 ? activeColor : 'var(--muted)';
+  el.rvolPressureLabel.style.borderColor = cr >= 1.8 ? activeBorder : 'rgba(98,119,158,.25)';
+  el.rvolPressureLabel.style.background = cr >= 1.8 ? (isB ? 'rgba(0,255,204,.08)' : 'rgba(255,59,105,.08)') : 'rgba(98,119,158,.12)';
+
+  el.trades30sLabel.textContent = `Trades: ${st.count}`;
+  el.tpsLabel.textContent = `${tpsRate.toFixed(1)} TPS`;
+  el.flowBuyFill.style.width = `${st.buyPct}%`;
+  el.flowBuyPct.textContent = `BUY ${st.buyPct.toFixed(0)}%`;
+  el.flowSellPct.textContent = `SELL ${st.sellPct.toFixed(0)}%`;
+
+  el.vol24h.textContent = formatVol(currentVol24h);
+  el.highLow24h.textContent = `${currentHigh24h.toFixed(6)} / ${currentLow24h.toFixed(6)}`;
+
+  if (obiHasData) {
+    const obiColor = realObiPct >= 55 ? 'var(--buy)' : realObiPct <= 45 ? 'var(--sell)' : 'var(--gold)';
+    el.obiVal.textContent = `${realObiPct.toFixed(0)}% BID`;
+    el.obiVal.style.color = obiColor;
+    el.obiFill.style.width = `${realObiPct}%`;
+    el.obiSrc.textContent = 'bookTicker ●';
+    el.obiSrc.style.color = 'var(--buy)';
+  }
+
+  const wb = computeWhaleBias();
+  el.whaleThreshold.textContent = `Umbral: $${formatUSD(currentWhaleThreshold)}`;
+  if (wb.total > 0) {
+    el.whaleBiasFill.style.width = `${wb.buyPct}%`;
+    el.whaleBuyPct.textContent = `COMPRA $${formatUSD(wb.buyVal)} (${wb.buyPct.toFixed(0)}%)`;
+    el.whaleSellPct.textContent = `VENTA $${formatUSD(wb.sellVal)} (${(100 - wb.buyPct).toFixed(0)}%)`;
+  } else {
+    el.whaleBiasFill.style.width = '50%';
+    el.whaleBuyPct.textContent = 'COMPRA —';
+    el.whaleSellPct.textContent = 'VENTA —';
+  }
+
+  if (latencyMs !== null) {
+    el.latencyTag.textContent = `LAT: ${latencyMs}ms`;
+    el.latencyTag.style.color = latencyMs < 300 ? 'var(--buy)' : latencyMs < 800 ? 'var(--gold)' : 'var(--sell)';
+  }
+
+  if (simulatedEntryPrice > 0) {
+    if (totalSimulatedTokens > 0) {
+      const currentPnLUsdt = (currentPrice - simulatedEntryPrice) * totalSimulatedTokens;
+      const currentPnLPct = ((currentPrice - simulatedEntryPrice) / simulatedEntryPrice) * 100;
+
+      pnlLiveDisplay.textContent = `${currentPnLUsdt >= 0 ? '+' : ''}$${currentPnLUsdt.toFixed(2)} (${currentPnLPct >= 0 ? '+' : ''}${currentPnLPct.toFixed(2)}%)`;
+      pnlLiveDisplay.style.color = currentPnLUsdt >= 0 ? 'var(--buy)' : 'var(--sell)';
+
+      if (lastATR) {
+        const tp1 = simulatedEntryPrice + (1.0 * lastATR);
+        const tp2 = simulatedEntryPrice + (2.0 * lastATR);
+        const tp3 = simulatedEntryPrice + (3.5 * lastATR);
+
+        document.getElementById('valTP1Price').textContent = tp1.toFixed(6);
+        document.getElementById('valTP2Price').textContent = tp2.toFixed(6);
+        document.getElementById('valTP3Price').textContent = tp3.toFixed(6);
+
+        document.getElementById('valTP1Pnl').textContent = `+$${((tp1 - simulatedEntryPrice) * totalSimulatedTokens).toFixed(2)}`;
+        document.getElementById('valTP2Pnl').textContent = `+$${((tp2 - simulatedEntryPrice) * totalSimulatedTokens).toFixed(2)}`;
+        document.getElementById('valTP3Pnl').textContent = `+$${((tp3 - simulatedEntryPrice) * totalSimulatedTokens).toFixed(2)}`;
+
+        document.getElementById('boxTP1').className = currentPrice >= tp1 ? "target-box active" : "target-box";
+        document.getElementById('boxTP2').className = currentPrice >= tp2 ? "target-box active" : "target-box";
+        document.getElementById('boxTP3').className = currentPrice >= tp3 ? "target-box active" : "target-box";
+      }
+    }
+
+    recalculateShortPosition();
+    if (lastATR) {
+      const sl1 = simulatedEntryPrice - (1.0 * lastATR);
+      const sl2 = simulatedEntryPrice - (2.0 * lastATR);
+      const sl3 = simulatedEntryPrice - (3.5 * lastATR);
+
+      const tokensShort = parseFloat(simCapitalShortInput.value) / simulatedEntryPrice;
+
+      document.getElementById('valSL1Price').textContent = sl1.toFixed(6);
+      document.getElementById('valSL2Price').textContent = sl2.toFixed(6);
+      document.getElementById('valSL3Price').textContent = sl3.toFixed(6);
+
+      document.getElementById('valSL1Pnl').textContent = `+$${((simulatedEntryPrice - sl1) * tokensShort).toFixed(2)}`;
+      document.getElementById('valSL2Pnl').textContent = `+$${((simulatedEntryPrice - sl2) * tokensShort).toFixed(2)}`;
+      document.getElementById('valSL3Pnl').textContent = `+$${((simulatedEntryPrice - sl3) * tokensShort).toFixed(2)}`;
+
+      document.getElementById('boxSL1').style.background = currentPrice <= sl1 ? "rgba(255,59,105,0.18)" : "#0b1426";
+      document.getElementById('boxSL2').style.background = currentPrice <= sl2 ? "rgba(255,59,105,0.18)" : "#0b1426";
+      document.getElementById('boxSL3').style.background = currentPrice <= sl3 ? "rgba(255,59,105,0.18)" : "#0b1426";
+    }
+  }
+
+  if (cr > 1.8) {
+    el.momentumBanner.style.background = isB ? 'rgba(0,255,204,0.12)' : 'rgba(255,59,105,0.12)';
+    el.momentumText.textContent = isB ? 'PRESIÓN AGRESIVA DE COMPRA' : 'PRESIÓN AGRESIVA DE VENTA';
+    el.momentumArrow.textContent = isB ? '▲' : '▼';
+    el.momentumArrow.style.color = activeColor;
+  } else {
+    el.momentumBanner.style.background = '#0c1220';
+    el.momentumText.textContent = 'Momentum neutral';
+    el.momentumArrow.textContent = '•';
+    el.momentumArrow.style.color = 'var(--muted)';
+  }
+
+  if (lastBB) {
+    const sq = lastSqueezeRank <= 0.25;
+    el.squeezeBadge.textContent = sq ? "💥 COMPRESIÓN CRÍTICA" : "COMPRESIÓN: EXPANDIENDO";
+    el.squeezeBadge.className = sq ? "squeezed" : "";
+    el.bbWidthVal.textContent = lastBB.width.toFixed(2) + "%";
+  }
+
+  const c4 = candles4h.at(-1);
+  el.vol4h.textContent = c4 ? formatVol(c4.v) : "—";
+
+  if (lastATR) {
+    el.atrVal.textContent = lastATR.toFixed(6);
+    const di = isB ? 1 : -1;
+    el.breakoutTarget.textContent = (currentPrice + di * 1.5 * lastATR).toFixed(6) + " USDT";
+  }
+
+  if(c4) {
+    const priceUp = c4.c > c4.o;
+    const volUp = st.total > globalAvgVol10s;
+    el.volDivLabel.textContent = (priceUp && volUp) ? "Acumulación" : (!priceUp && volUp) ? "Distribución" : "Neutral";
+    el.volDivLabel.style.color = (priceUp && volUp) ? "var(--buy)" : (!priceUp && volUp) ? "var(--sell)" : "var(--muted)";
+  }
+
+  updateRadarInfo();
+  drawChart();
+}
+
+function render() {
+  currentAnimatedRvol += (targetRvol - currentAnimatedRvol) * 0.13;
+  if (Math.abs(currentAnimatedRvol - targetRvol) < 0.001) currentAnimatedRvol = targetRvol;
+  drawRvolGauge(currentAnimatedRvol, rvolIsBuy);
+
+  if (dirty) {
+    dirty = false;
+    refreshTradeWindow();
+    updateUI();
+    checkAlerts();
+  }
+  requestAnimationFrame(render);
+}
+
+setInterval(() => { dirty = true; }, 200);
+
+function setupCanvas() {
+  const d = window.devicePixelRatio || 1;
+
+  const chartBox = el.canvas.parentElement;
+  const conW = Math.max(280, (chartBox.clientWidth || 600));
+  el.canvas.width = conW * d; el.canvas.height = CHART_H * d;
+  el.canvas.style.width = conW + 'px'; el.canvas.style.height = CHART_H + 'px';
+  ctx.setTransform(d, 0, 0, d, 0, 0);
+
+  const gaugeBox = el.rvolGauge.parentElement;
+  const availW = Math.max(200, Math.min(420, gaugeBox.clientWidth || 380));
+  gaugeW = availW; gaugeH = availW * (214 / 380);
+
+  el.rvolGauge.width = gaugeW * d; el.rvolGauge.height = gaugeH * d;
+  el.rvolGauge.style.width = gaugeW + 'px'; el.rvolGauge.style.height = gaugeH + 'px';
+
+  computeIndicators(false);
+  drawChart();
+}
+
+window.addEventListener('resize', setupCanvas);
+setInterval(() => { el.clock.textContent = new Date().toLocaleTimeString('es-ES', { hour12: false }); }, 1000);
+setInterval(() => { tpsRate = tpsCount; tpsCount = 0; dirty = true; }, 1000);
+
+setInterval(() => {
+  if (Date.now() - lastMsgTime > 6000) { forceReconnect(); }
+}, 4000);
+
+window.onload = async () => {
+  setupCanvas();
+  await bootstrap();
+  connect();
+  requestAnimationFrame(render);
+};
+</script>
+</body>
+</html>
